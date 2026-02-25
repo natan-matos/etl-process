@@ -1,70 +1,159 @@
 """
-extractor.py
-Medallion Architecture — Bronze Layer ingestion.
+transformer.py
+Medallion Architecture — Bronze to Silver transformation.
 
-Reads raw CSV files from storage/bronze/ with zero transformation.
-The Bronze layer preserves the source data exactly as received —
-no cleaning, no type casting, no business logic.
+Takes raw DataFrames from the Bronze layer and applies:
+  - Type casting and date parsing
+  - Null / duplicate / invalid value removal
+  - String normalization (title case, lowercase)
+  - Surrogate key generation
+  - Derived columns (year, month, day, valor_sem_impostos)
+  - Referential integrity check (vendas <-> clientes)
 
-Expected structure:
-    storage/bronze/
-        clientes/clientes.csv
-        vendas/vendas.csv
+Output is the Silver layer: clean, typed, enriched DataFrames
+ready to be written as Parquet and later promoted to Gold.
 """
 
 import pandas as pd
 import logging
-from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
 
-def extract_csv(filepath: str | Path, encoding: str = "utf-8") -> pd.DataFrame:
-    """Read a single CSV file from the Bronze layer into a DataFrame.
+# ---------------------------------------------------------------------------
+# Bronze -> Silver: per-table cleaning
+# ---------------------------------------------------------------------------
 
-    Args:
-        filepath: Path to the CSV file.
-        encoding: File encoding (default utf-8).
+def _clean_clientes(df: pd.DataFrame) -> pd.DataFrame:
+    """Clean and standardize the clientes table."""
+    logger.info("[SILVER] Cleaning clientes ...")
+    df = df.copy()
 
-    Returns:
-        Raw DataFrame — untouched.
+    before = len(df)
+    df.drop_duplicates(subset=["id_cliente"], keep="last", inplace=True)
+    logger.info(f"  -> Duplicates removed: {before - len(df)}")
 
-    Raises:
-        FileNotFoundError: If the file does not exist.
-        ValueError: If the file is empty.
-    """
-    path = Path(filepath)
-    if not path.exists():
-        raise FileNotFoundError(f"[BRONZE] File not found: {path}")
+    df.dropna(subset=["id_cliente"], inplace=True)
 
-    logger.info(f"[BRONZE] Reading {path.name} ...")
-    df = pd.read_csv(path, encoding=encoding)
+    df["id_cliente"] = df["id_cliente"].astype(int)
+    df["nome"]  = df["nome"].str.strip().str.title()
+    df["email"] = df["email"].str.strip().str.lower()
 
-    if df.empty:
-        raise ValueError(f"[BRONZE] Empty file: {path}")
+    invalid_emails = (~df["email"].str.contains(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", regex=True)).sum()
+    if invalid_emails:
+        logger.warning(f"  -> {invalid_emails} invalid email(s) detected.")
 
-    logger.info(f"  -> {len(df)} rows | columns: {list(df.columns)}")
+    logger.info(f"  -> {len(df)} clientes after cleaning.")
     return df
 
 
-def extract_all(bronze_dir: str | Path) -> dict[str, pd.DataFrame]:
-    """Extract all expected source files from the Bronze layer.
+def _clean_vendas(df: pd.DataFrame) -> pd.DataFrame:
+    """Clean and standardize the vendas table."""
+    logger.info("[SILVER] Cleaning vendas ...")
+    df = df.copy()
 
-    Each source lives in its own subdirectory:
-        bronze/clientes/clientes.csv
-        bronze/vendas/vendas.csv
+    df["data"] = pd.to_datetime(df["data"], errors="coerce")
+
+    before = len(df)
+    df.dropna(subset=["data", "valor", "id_cliente"], inplace=True)
+    logger.info(f"  -> Invalid rows removed: {before - len(df)}")
+
+    df = df[df["valor"] > 0]
+
+    df["id_cliente"] = df["id_cliente"].astype(int)
+    df["valor"]   = df["valor"].round(2)
+    df["produto"] = df["produto"].str.strip()
+
+    logger.info(f"  -> {len(df)} vendas after cleaning.")
+    return df
+
+
+# ---------------------------------------------------------------------------
+# Silver -> Gold: star schema modeling
+# ---------------------------------------------------------------------------
+
+def build_dim_clientes(clientes_raw: pd.DataFrame) -> pd.DataFrame:
+    """Build the dim_clientes dimension table.
+
+    Schema:
+        sk_cliente  INTEGER  PK  (surrogate key)
+        id_cliente  INTEGER      (natural key from source)
+        nome        TEXT
+        email       TEXT
+    """
+    df = _clean_clientes(clientes_raw)
+    dim = df[["id_cliente", "nome", "email"]].reset_index(drop=True)
+    dim.insert(0, "sk_cliente", range(1, len(dim) + 1))
+
+    logger.info(f"[GOLD model] dim_clientes: {len(dim)} rows")
+    return dim
+
+
+def build_fato_vendas(
+    vendas_raw: pd.DataFrame,
+    dim_clientes: pd.DataFrame,
+) -> pd.DataFrame:
+    """Build the fato_vendas fact table.
+
+    Schema:
+        sk_venda            INTEGER  PK
+        sk_cliente          INTEGER  FK -> dim_clientes
+        id_cliente          INTEGER      (natural key preserved)
+        data                DATE
+        ano / mes / dia     INTEGER      (derived — simplify GROUP BY)
+        produto             TEXT
+        valor               NUMERIC
+        valor_sem_impostos  NUMERIC      (derived — valor / 1.12)
+    """
+    df = _clean_vendas(vendas_raw)
+
+    # Resolve surrogate key via lookup on the dimension
+    sk_map = dim_clientes.set_index("id_cliente")["sk_cliente"]
+    df["sk_cliente"] = df["id_cliente"].map(sk_map)
+
+    orphans = df["sk_cliente"].isna().sum()
+    if orphans:
+        logger.warning(f"  -> {orphans} sale(s) with no matching client — dropping.")
+    df.dropna(subset=["sk_cliente"], inplace=True)
+    df["sk_cliente"] = df["sk_cliente"].astype(int)
+
+    # Date-derived columns
+    df["ano"] = df["data"].dt.year
+    df["mes"] = df["data"].dt.month
+    df["dia"] = df["data"].dt.day
+
+    # Business-derived column
+    df["valor_sem_impostos"] = (df["valor"] / 1.12).round(2)
+
+    fato = df[[
+        "sk_cliente", "id_cliente",
+        "data", "ano", "mes", "dia",
+        "produto", "valor", "valor_sem_impostos",
+    ]].reset_index(drop=True)
+
+    fato.insert(0, "sk_venda", range(1, len(fato) + 1))
+
+    logger.info(f"[GOLD model] fato_vendas: {len(fato)} rows")
+    return fato
+
+
+# ---------------------------------------------------------------------------
+# Orchestrator
+# ---------------------------------------------------------------------------
+
+def transform(raw: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
+    """Run all Bronze -> Silver -> Gold model transformations.
 
     Args:
-        bronze_dir: Root of the Bronze layer.
+        raw: {'vendas': DataFrame, 'clientes': DataFrame}
 
     Returns:
-        {'vendas': DataFrame, 'clientes': DataFrame}
+        {'dim_clientes': DataFrame, 'fato_vendas': DataFrame}
     """
-    bronze_dir = Path(bronze_dir)
+    dim_clientes = build_dim_clientes(raw["clientes"])
+    fato_vendas  = build_fato_vendas(raw["vendas"], dim_clientes)
 
-    sources = {
-        "vendas":   bronze_dir / "vendas"   / "vendas.csv",
-        "clientes": bronze_dir / "clientes" / "clientes.csv",
+    return {
+        "dim_clientes": dim_clientes,
+        "fato_vendas":  fato_vendas,
     }
-
-    return {name: extract_csv(path) for name, path in sources.items()}
