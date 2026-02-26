@@ -1,0 +1,16 @@
+{"timestamp":"2026-02-26T23:27:44.486856Z","level":"info","event":"DAG bundles loaded: dags-folder, example_dags","logger":"airflow.dag_processing.bundles.manager.DagBundlesManager","filename":"manager.py","lineno":179}
+{"timestamp":"2026-02-26T23:27:44.487142Z","level":"info","event":"Filling up the DagBag from /Users/natanmatos/Documents/idinheiro/dags/dag_etl_vendas.py","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":593}
+{"timestamp":"2026-02-26T23:27:44.490611Z","level":"warning","event":"No system locale set. Falling back to 'en_US'. Set LANG/LC_ALL or pass locale_code to override.","category":"UserWarning","filename":"/Users/natanmatos/.pyenv/versions/3.11.0/envs/etl/lib/python3.11/site-packages/cron_descriptor/ExpressionDescriptor.py","lineno":69,"logger":"py.warnings"}
+{"timestamp":"2026-02-26T23:27:44.510104Z","level":"info","event":"Task instance is in running state","logger":"task.stdout"}
+{"timestamp":"2026-02-26T23:27:44.510169Z","level":"info","event":" Previous state of the Task instance: TaskInstanceState.QUEUED","logger":"task.stdout"}
+{"timestamp":"2026-02-26T23:27:44.510392Z","level":"info","event":"Current task name:extract","logger":"task.stdout"}
+{"timestamp":"2026-02-26T23:27:44.510416Z","level":"info","event":"Dag name:etl_vendas_diario","logger":"task.stdout"}
+{"timestamp":"2026-02-26T23:27:44.514810Z","level":"info","event":"[BRONZE] clientes | date=2026-02-26 | 3 rows","logger":"extract","filename":"extract.py","lineno":39}
+{"timestamp":"2026-02-26T23:27:44.515900Z","level":"info","event":"[BRONZE] vendas | date=2026-02-26 | 4 rows","logger":"extract","filename":"extract.py","lineno":39}
+{"timestamp":"2026-02-26T23:27:44.541302Z","level":"info","event":" -> /Users/natanmatos/Documents/idinheiro/storage/silver/clientes/extracted_date=2026-02-26/data.parquet (3 rows)","logger":"load","filename":"load.py","lineno":23}
+{"timestamp":"2026-02-26T23:27:44.542103Z","level":"info","event":" -> /Users/natanmatos/Documents/idinheiro/storage/silver/vendas/extracted_date=2026-02-26/data.parquet (4 rows)","logger":"load","filename":"load.py","lineno":23}
+{"timestamp":"2026-02-26T23:27:44.542143Z","level":"info","event":"[BRONZE → SILVER temp] ds=2026-02-26 | vendas=4 | clientes=3","logger":"unusual_prefix_9a7da1b42163b0c85d35f63bbe8d6f201a988d3f_dag_etl_vendas","filename":"dag_etl_vendas.py","lineno":46}
+{"timestamp":"2026-02-26T23:27:44.542206Z","level":"info","event":"Done. Returned value was: None","logger":"airflow.task.operators.airflow.providers.standard.operators.python.PythonOperator","filename":"python.py","lineno":230}
+{"timestamp":"2026-02-26T23:27:44.550072Z","level":"info","event":"Task instance in success state","logger":"task.stdout"}
+{"timestamp":"2026-02-26T23:27:44.550114Z","level":"info","event":" Previous state of the Task instance: TaskInstanceState.RUNNING","logger":"task.stdout"}
+{"timestamp":"2026-02-26T23:27:44.550335Z","level":"info","event":"Task operator:<Task(PythonOperator): extract>","logger":"task.stdout"}

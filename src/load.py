@@ -1,3 +1,5 @@
+"""load.py"""
+
 import os
 import logging
 import pandas as pd
@@ -59,7 +61,7 @@ DDL = [
         sk_produto     SERIAL       PRIMARY KEY,
         nome_produto   VARCHAR(255) NOT NULL UNIQUE,
         operadora      VARCHAR(100) NOT NULL,
-        categoria      VARCHAR(100) NOT NULL,
+        categoria      VARCHAR(100) NOT NULL
     );
 """,
 """
@@ -81,7 +83,6 @@ DDL = [
         sk_produto         INTEGER        NOT NULL REFERENCES dim_produto(sk_produto),
         sk_data            INTEGER        NOT NULL REFERENCES dim_data(sk_data),
         valor              NUMERIC(12, 2) NOT NULL,
-        valor_sem_impostos NUMERIC(12, 2) NOT NULL,
         is_boleto          BOOLEAN        NOT NULL DEFAULT FALSE
     );
     """,
@@ -121,13 +122,13 @@ def load_dw(gold: dict[str, pd.DataFrame], mode: str = "full") -> dict[str, int]
     if mode == "full":
         with engine.begin() as conn:
             conn.execute(text(
-                "TRUNCATE TABLE fato_vendas, dim_cliente, dim_produto, dim_data"
+                "TRUNCATE TABLE fato_vendas, dim_cliente, dim_produto, dim_data "
                 "RESTART IDENTITY CASCADE;"
             ))
         logger.info("[DW] Tables truncated.")
     
 
-    for table in ("dim_cliente", "dim_protudo", "dim_data"):
+    for table in ("dim_cliente", "dim_produto", "dim_data"):
         df = gold[table].copy()
         if "data" in df.columns:
             df["data"] = df["data"].astype(str)
@@ -140,18 +141,19 @@ def load_dw(gold: dict[str, pd.DataFrame], mode: str = "full") -> dict[str, int]
 
     with engine.begin() as conn:
         conn.execute(text( """
-            INSERT INTO fato_vendas (sk_cliente, sk_produto, sk_data, valor)
-            SELECT
-                c.sk_cliente,
-                p.sk_produto,
-                d.sk_data,
-                s.valor
-            FROM fato_stage s
-            JOIN dim_cliente c ON c.id_cliente=s.id_cliente
-            JOIN dim_produto p ON p.nome_produto = s.nome_produto
-            JOIN dim_data d    ON d.data = s.data::DATE;
+            INSERT INTO fato_vendas (sk_cliente, sk_produto, sk_data, valor, is_boleto)
+                SELECT
+                    c.sk_cliente,
+                    p.sk_produto,
+                    d.sk_data,
+                    s.valor,
+                    s.is_boleto
+                FROM fato_stage s
+                JOIN dim_cliente   c ON c.id_cliente     = s.id_cliente
+                JOIN dim_produto   p ON p.nome_produto   = s.nome_produto
+                JOIN dim_data      d ON d.data           = s.data::date;
         """ ))
-        conn.execute(text("DROP TABLE IF EXISTIS fato_stage;"))
+        conn.execute(text("DROP TABLE IF EXISTS fato_stage;"))
     logger.info(f"[DW] fato_vendas: {len(fato)} rows loaded.")
 
     counts = {}

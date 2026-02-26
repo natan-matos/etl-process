@@ -1,0 +1,21 @@
+{"timestamp":"2026-02-26T23:30:34.801136Z","level":"info","event":"DAG bundles loaded: dags-folder, example_dags","logger":"airflow.dag_processing.bundles.manager.DagBundlesManager","filename":"manager.py","lineno":179}
+{"timestamp":"2026-02-26T23:30:34.801621Z","level":"info","event":"Filling up the DagBag from /Users/natanmatos/Documents/idinheiro/dags/dag_etl_vendas.py","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":593}
+{"timestamp":"2026-02-26T23:30:34.806151Z","level":"warning","event":"No system locale set. Falling back to 'en_US'. Set LANG/LC_ALL or pass locale_code to override.","category":"UserWarning","filename":"/Users/natanmatos/.pyenv/versions/3.11.0/envs/etl/lib/python3.11/site-packages/cron_descriptor/ExpressionDescriptor.py","lineno":69,"logger":"py.warnings"}
+{"timestamp":"2026-02-26T23:30:34.812752Z","level":"info","event":"Task instance is in running state","logger":"task.stdout"}
+{"timestamp":"2026-02-26T23:30:34.812798Z","level":"info","event":" Previous state of the Task instance: TaskInstanceState.QUEUED","logger":"task.stdout"}
+{"timestamp":"2026-02-26T23:30:34.812999Z","level":"info","event":"Current task name:gold","logger":"task.stdout"}
+{"timestamp":"2026-02-26T23:30:34.813022Z","level":"info","event":"Dag name:etl_vendas_diario","logger":"task.stdout"}
+{"timestamp":"2026-02-26T23:30:34.941741Z","level":"info","event":"[GOLD] dim cliente: 3 rows","logger":"transform","filename":"transform.py","lineno":69}
+{"timestamp":"2026-02-26T23:30:34.943496Z","level":"info","event":"[GOLD] dim_produto: 3 rows","logger":"transform","filename":"transform.py","lineno":91}
+{"timestamp":"2026-02-26T23:30:34.945648Z","level":"info","event":"[GOLD] dim_data: 4 rows","logger":"transform","filename":"transform.py","lineno":113}
+{"timestamp":"2026-02-26T23:30:34.947258Z","level":"info","event":"[GOLD] fato_vendas: 4 rows","logger":"transform","filename":"transform.py","lineno":146}
+{"timestamp":"2026-02-26T23:30:34.947304Z","level":"info","event":"[GOLD] Writing Parquet | date=2026-02-26","logger":"load","filename":"load.py","lineno":40}
+{"timestamp":"2026-02-26T23:30:34.948267Z","level":"info","event":" -> /Users/natanmatos/Documents/idinheiro/storage/gold/dim_cliente/extracted_date=2026-02-26/data.parquet (3 rows)","logger":"load","filename":"load.py","lineno":23}
+{"timestamp":"2026-02-26T23:30:34.948752Z","level":"info","event":" -> /Users/natanmatos/Documents/idinheiro/storage/gold/dim_produto/extracted_date=2026-02-26/data.parquet (3 rows)","logger":"load","filename":"load.py","lineno":23}
+{"timestamp":"2026-02-26T23:30:34.949690Z","level":"info","event":" -> /Users/natanmatos/Documents/idinheiro/storage/gold/dim_data/extracted_date=2026-02-26/data.parquet (4 rows)","logger":"load","filename":"load.py","lineno":23}
+{"timestamp":"2026-02-26T23:30:34.950321Z","level":"info","event":" -> /Users/natanmatos/Documents/idinheiro/storage/gold/fato_vendas/extracted_date=2026-02-26/data.parquet (4 rows)","logger":"load","filename":"load.py","lineno":23}
+{"timestamp":"2026-02-26T23:30:34.967280Z","level":"info","event":"[GOLD] Processado ds=2026-02-26","logger":"unusual_prefix_9a7da1b42163b0c85d35f63bbe8d6f201a988d3f_dag_etl_vendas","filename":"dag_etl_vendas.py","lineno":95}
+{"timestamp":"2026-02-26T23:30:34.967410Z","level":"info","event":"Done. Returned value was: None","logger":"airflow.task.operators.airflow.providers.standard.operators.python.PythonOperator","filename":"python.py","lineno":230}
+{"timestamp":"2026-02-26T23:30:34.971987Z","level":"info","event":"Task instance in success state","logger":"task.stdout"}
+{"timestamp":"2026-02-26T23:30:34.972035Z","level":"info","event":" Previous state of the Task instance: TaskInstanceState.RUNNING","logger":"task.stdout"}
+{"timestamp":"2026-02-26T23:30:34.972279Z","level":"info","event":"Task operator:<Task(PythonOperator): gold>","logger":"task.stdout"}

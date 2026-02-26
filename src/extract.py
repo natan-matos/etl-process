@@ -1,3 +1,5 @@
+"""extract.py"""
+
 import pandas as pd
 import logging
 from pathlib import Path 
@@ -37,4 +39,4 @@ def extract_all(bronze_dir: str | Path, ds: str) -> dict[str, pd.DataFrame]:
         logger.info(f"[BRONZE] {name} | date={ds} | {len(df)} rows")
         result[name] = df
 
-        return result
+    return result

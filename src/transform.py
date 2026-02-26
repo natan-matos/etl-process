@@ -1,3 +1,5 @@
+"""transform.py"""
+
 import pandas as pd
 import logging
 
@@ -151,7 +153,7 @@ def to_gold(silver: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
     dim_cliente = gold_dim_cliente(silver["clientes"])
     dim_produto = gold_dim_produto(silver["vendas"])
     dim_data = gold_dim_date(silver["vendas"])
-    fato_vendas = gold_fato_vendas(silver["vendsa"], dim_cliente, dim_produto, dim_data)
+    fato_vendas = gold_fato_vendas(silver["vendas"], dim_cliente, dim_produto, dim_data)
 
     return {
         "dim_cliente": dim_cliente,

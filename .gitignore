@@ -1,0 +1,9 @@
+simple_auth_manager_passwords.json.generated
+.evn
+airflow.cfg
+airflow.db
+airflow.db-shm 
+airflow.db-wal
+dags/__pycache__
+dags/logs
+src/__pycache__

@@ -1,0 +1,18 @@
+{"timestamp":"2026-02-26T23:30:35.313785Z","level":"info","event":"DAG bundles loaded: dags-folder, example_dags","logger":"airflow.dag_processing.bundles.manager.DagBundlesManager","filename":"manager.py","lineno":179}
+{"timestamp":"2026-02-26T23:30:35.314104Z","level":"info","event":"Filling up the DagBag from /Users/natanmatos/Documents/idinheiro/dags/dag_etl_vendas.py","logger":"airflow.models.dagbag.BundleDagBag","filename":"dagbag.py","lineno":593}
+{"timestamp":"2026-02-26T23:30:35.317332Z","level":"warning","event":"No system locale set. Falling back to 'en_US'. Set LANG/LC_ALL or pass locale_code to override.","category":"UserWarning","filename":"/Users/natanmatos/.pyenv/versions/3.11.0/envs/etl/lib/python3.11/site-packages/cron_descriptor/ExpressionDescriptor.py","lineno":69,"logger":"py.warnings"}
+{"timestamp":"2026-02-26T23:30:35.324992Z","level":"info","event":"Task instance is in running state","logger":"task.stdout"}
+{"timestamp":"2026-02-26T23:30:35.325085Z","level":"info","event":" Previous state of the Task instance: TaskInstanceState.QUEUED","logger":"task.stdout"}
+{"timestamp":"2026-02-26T23:30:35.325405Z","level":"info","event":"Current task name:load_dw","logger":"task.stdout"}
+{"timestamp":"2026-02-26T23:30:35.325442Z","level":"info","event":"Dag name:etl_vendas_diario","logger":"task.stdout"}
+{"timestamp":"2026-02-26T23:30:35.504233Z","level":"info","event":"[DW] Tables truncated.","logger":"load","filename":"load.py","lineno":128}
+{"timestamp":"2026-02-26T23:30:35.508664Z","level":"info","event":"[DW] dim_cliente: 3 rows loaded","logger":"load","filename":"load.py","lineno":136}
+{"timestamp":"2026-02-26T23:30:35.510608Z","level":"info","event":"[DW] dim_produto: 3 rows loaded","logger":"load","filename":"load.py","lineno":136}
+{"timestamp":"2026-02-26T23:30:35.513550Z","level":"info","event":"[DW] dim_data: 4 rows loaded","logger":"load","filename":"load.py","lineno":136}
+{"timestamp":"2026-02-26T23:30:35.518908Z","level":"info","event":"[DW] fato_vendas: 4 rows loaded.","logger":"load","filename":"load.py","lineno":157}
+{"timestamp":"2026-02-26T23:30:35.520189Z","level":"info","event":"[DW] Validation: {'dim_cliente': 3, 'dim_produto': 3, 'dim_data': 4, 'fato_vendas': 4}","logger":"load","filename":"load.py","lineno":163}
+{"timestamp":"2026-02-26T23:30:35.520236Z","level":"info","event":"[VALIDATE] OK -> {'dim_cliente': 3, 'dim_produto': 3, 'dim_data': 4, 'fato_vendas': 4}","logger":"unusual_prefix_9a7da1b42163b0c85d35f63bbe8d6f201a988d3f_dag_etl_vendas","filename":"dag_etl_vendas.py","lineno":112}
+{"timestamp":"2026-02-26T23:30:35.520420Z","level":"info","event":"Done. Returned value was: None","logger":"airflow.task.operators.airflow.providers.standard.operators.python.PythonOperator","filename":"python.py","lineno":230}
+{"timestamp":"2026-02-26T23:30:35.525253Z","level":"info","event":"Task instance in success state","logger":"task.stdout"}
+{"timestamp":"2026-02-26T23:30:35.525287Z","level":"info","event":" Previous state of the Task instance: TaskInstanceState.RUNNING","logger":"task.stdout"}
+{"timestamp":"2026-02-26T23:30:35.525525Z","level":"info","event":"Task operator:<Task(PythonOperator): load_dw>","logger":"task.stdout"}
