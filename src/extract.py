@@ -1,5 +1,3 @@
-"""extract.py"""
-
 import pandas as pd
 import logging
 from pathlib import Path 
@@ -17,22 +15,29 @@ def extract_all(bronze_dir: str | Path, ds: str) -> dict[str, pd.DataFrame]:
         {'vendas': DataFrame, 'clientes': DataFrame}
     """
 
+    # Garante que bronze_dir seja um objeto Path, independente de vir como string ou Path
     bronze_dir = Path(bronze_dir)
+
+    # Mapeia os nomes das tabelas para seus caminhos particionados por data (Hive-style: date=YYYY-MM-DD)
     sources = {
         "clientes": bronze_dir / "clientes" / f"date={ds}" / "clientes.csv",
         "vendas": bronze_dir / "vendas" / f"date={ds}" / "vendas.csv"
     }
 
+    # Dicionário que acumulará os DataFrames lidos com sucesso
     result = {}
 
     for name, path in sources.items():
+        # Verifica se a partição existe antes de tentar ler; falha rápido com mensagem clara
         if not path.exists():
             raise FileNotFoundError(
                 f"[BRONZE] Particao nao encontrada para {name} em {ds}."
             )
         
+        # Lê o CSV da partição correspondente
         df = pd.read_csv(path)
 
+        # Rejeita arquivos vazios para evitar propagação silenciosa de dados incompletos
         if df.empty:
             raise ValueError(f"[BRONZE] Particao vazia: {path}")
         
